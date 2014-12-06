@@ -26,8 +26,13 @@ public class FacebookController {
         if (!facebook.isAuthorized()) {
             return "redirect:/connect/facebook";
         } else {
+        	
+        	 // Create autonomous agent to browse Facebook
+        	 FacebookAgent fa = new FacebookAgent(facebook);
+        	 fa.start();
+
+        	 // Basic information to show in the browser
         	 model.addAttribute(facebook.userOperations().getUserProfile());
-        	 new FacebookAgent(facebook);
              return "done";
         }
     }

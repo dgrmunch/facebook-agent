@@ -15,7 +15,10 @@ public class FacebookAgent extends Thread {
 	
 	public FacebookAgent(Facebook facebook) {
 		this.setFacebook(facebook);
-		this.run();
+	}
+	
+	public void run() {
+		System.out.println("Facebook agent is running");
 	}
 
 	public Facebook getFacebook() {
