@@ -3,21 +3,6 @@
 		<title>Agent Login</title>
 	</head>
 	<body>
-		<h3>The agent <span th:text="${facebookProfile.name}"> is connected</span>!</h3>
-		
-		<h4>Data</h4>
-		
-		<div th:each="post:${friendProfiles}">
-			<b th:text="${post.location}">from</b> wrote:
-			<p th:text="${post.name}"> es el puto nombre</p>
-			<hr/>
-		</div>
-		
-		<div th:each="post:${feed}">
-			<b th:text="${post.from.name}">from</b> wrote:
-			<p th:text="${post.message}">message text</p>
-			<img th:if="${post.picture}" th:src="${post.picture}"/>
-			<hr/>
-		</div>
+		<h3>The agent <span th:text="${facebookProfile.name}"> is now alive!</span>!</h3>
 	</body>
 </html>
