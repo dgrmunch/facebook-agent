@@ -1,27 +1,21 @@
 package com.xmunch.facebook;
 
-import java.util.Date;
-import java.util.Iterator;
-
 import javax.inject.Inject;
 
 import org.springframework.social.facebook.api.Facebook;
-import org.springframework.social.facebook.api.FacebookLink;
-import org.springframework.social.facebook.api.ImageType;
-import org.springframework.social.facebook.api.PagedList;
-import org.springframework.social.facebook.api.PagingParameters;
-import org.springframework.social.facebook.api.Post;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.google.gson.Gson;
 import com.xmunch.facebook.model.FacebookAgent;
 
 @Controller
 @RequestMapping("/")
 public class FacebookController {
 
+	Gson gson = new Gson();
     private Facebook facebook;
     private FacebookAgent fa;
     
@@ -36,6 +30,7 @@ public class FacebookController {
             return "redirect:/connect/facebook";
         } else {
         	 this.fa = new FacebookAgent(facebook);	
+        	 model.addAttribute("json",gson.toJson(fa.getFriends()));
              return "done";
         }
     }

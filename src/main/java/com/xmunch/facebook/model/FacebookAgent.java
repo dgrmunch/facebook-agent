@@ -84,4 +84,12 @@ public class FacebookAgent {
 		
 		return friends.indexOf(friend);
 	}
+
+	public List<FacebookFriend> getFriends() {
+		return friends;
+	}
+
+	public void setFriends(List<FacebookFriend> friends) {
+		this.friends = friends;
+	}
 }
