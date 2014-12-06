@@ -3,59 +3,85 @@
  */
 package com.xmunch.facebook.model;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.FacebookProfile;
 import org.springframework.social.facebook.api.PagedList;
+import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.Reference;
 
 /**
  * @author xmunch
  * 
  */
-public class FacebookAgent extends Thread {
+public class FacebookAgent {
 
-	private Facebook facebook;
-	private List<FacebookFriend> friends;
-	
+	private String lastPostId = "";
+	private List<FacebookFriend> friends = new ArrayList<FacebookFriend>();
+
 	public FacebookAgent(Facebook facebook) {
-		this.setFacebook(facebook);
-	}
-	
-	public void run() {
 		System.out.println("Facebook agent is running");
-		updateFriends();
+		consumeInformation(facebook);
+		System.out.println("Done");
 	}
 
-	public Facebook getFacebook() {
-		return facebook;
-	}
+	public void consumeInformation(Facebook facebook) {
+		PagedList<Post> feed = facebook.feedOperations().getHomeFeed();
 
-	public void setFacebook(Facebook facebook) {
-		this.facebook = facebook;
-	}
+		if (!feed.get(0).getId().equals(this.lastPostId)) {
+			lastPostId = feed.get(0).getId();
+			Iterator<Post> iterator = feed.iterator();
 
-	private void updateFriends() {
-		Reference friendPointer;
-		FacebookProfile friendProfile;
-		FacebookFriend friend;
-		PagedList<Reference> friendsPagedList = this.facebook
-				.friendOperations().getFriends();
-		Iterator<Reference> iterator = friendsPagedList.iterator();
+			while (iterator.hasNext()) {
+				Post post = iterator.next();
+				Integer friendIndex = addFacebookFriend(post.getFrom());
 
-		while (iterator.hasNext()) {
-			friendPointer = iterator.next();
-			friendProfile = facebook.userOperations().getUserProfile(
-					friendPointer.getId());
-			friend = new FacebookFriend(friendProfile.getId(), friendProfile);
-			if (!friends.contains(friend)) {
-				friends.add(friend);
+				/*
+				 * In order to finish the loop when we reach an old post which
+				 * has been already saved will control repeated items in the
+				 * addPost method. If during the addPost execution a similar
+				 * instance of "post" is found this function will stop.
+				 */
+
+				if (!this.friends.get(friendIndex).addPost(post)) {
+					break;
+				}
 			}
 		}
-
-		System.out.println("The list of friends has been updated with " + friends.size() + " friends.");
 	}
 
+	public void produceInformation() {
+		// TODO
+	}
+
+	private Integer addFacebookFriend(Reference from) {
+			FacebookFriend friend = new FacebookFriend(from.getId(), from.getName());
+		
+		Boolean repeated = false;
+		Iterator<FacebookFriend> iterator = friends.iterator();
+		
+		while(iterator.hasNext()){
+			FacebookFriend item = iterator.next();
+			if(item.getId().equals(friend.getId())){
+				repeated = true;
+				friend = item;
+			}
+		}
+		
+		if (!repeated){
+			
+			friends.add(friend);	
+			System.out.println("The list of friends has been updated with " + friend.getName());
+			System.out.println("The agent has located "+friends.size() + " friends.");
+		
+		} else {
+			
+			System.out.println(friend.getName()+" is already known. Any new friend node will be added.");
+		}
+		
+		return friends.indexOf(friend);
+	}
 }
