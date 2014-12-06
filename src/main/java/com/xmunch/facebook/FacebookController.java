@@ -3,12 +3,12 @@ package com.xmunch.facebook;
 import javax.inject.Inject;
 
 import org.springframework.social.facebook.api.Facebook;
-import org.springframework.social.facebook.api.PagedList;
-import org.springframework.social.facebook.api.Post;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.xmunch.facebook.model.FacebookAgent;
 
 @Controller
 @RequestMapping("/")
@@ -27,11 +27,8 @@ public class FacebookController {
             return "redirect:/connect/facebook";
         } else {
         	 model.addAttribute(facebook.userOperations().getUserProfile());
-             PagedList<Post> homeFeed = facebook.feedOperations().getHomeFeed();
-             model.addAttribute("feed", homeFeed);
-             
+        	 new FacebookAgent(facebook);
              return "done";
         }
     }
-
 }
