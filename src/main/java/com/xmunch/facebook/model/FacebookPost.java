@@ -1,9 +1,10 @@
 package com.xmunch.facebook.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class FacebookPost {
-	
+public class FacebookPost implements Serializable {
+	private static final long serialVersionUID = -6233604600845129202L;
 	String id;
 	String type;
 	String message;

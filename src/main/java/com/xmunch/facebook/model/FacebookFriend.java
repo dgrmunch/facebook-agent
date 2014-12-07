@@ -1,5 +1,6 @@
 package com.xmunch.facebook.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +10,9 @@ import org.springframework.social.facebook.api.Post;
  * @author xmunch
  * 
  */
-public class FacebookFriend {
+public class FacebookFriend implements Serializable{
 
+	private static final long serialVersionUID = -1201312535783926522L;
 	private String id;
 	private String name;
 	private List<FacebookPost> posts = new ArrayList<FacebookPost>();
