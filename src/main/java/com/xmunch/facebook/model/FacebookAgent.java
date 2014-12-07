@@ -52,9 +52,6 @@ public class FacebookAgent {
 		}
 	}
 
-	public void produceInformation() {
-		// TODO
-	}
 
 	private Integer addFacebookFriend(Reference from) {
 			FacebookFriend friend = new FacebookFriend(from.getId(), from.getName());
