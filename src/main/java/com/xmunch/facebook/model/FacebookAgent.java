@@ -52,32 +52,34 @@ public class FacebookAgent {
 		}
 	}
 
-
 	private Integer addFacebookFriend(Reference from) {
-			FacebookFriend friend = new FacebookFriend(from.getId(), from.getName());
-		
+		FacebookFriend friend = new FacebookFriend(from.getId(), from.getName());
+
 		Boolean repeated = false;
 		Iterator<FacebookFriend> iterator = friends.iterator();
-		
-		while(iterator.hasNext()){
+
+		while (iterator.hasNext()) {
 			FacebookFriend item = iterator.next();
-			if(item.getId().equals(friend.getId())){
+			if (item.getId().equals(friend.getId())) {
 				repeated = true;
 				friend = item;
 			}
 		}
-		
-		if (!repeated){
-			
-			friends.add(friend);	
-			System.out.println("The list of friends has been updated with " + friend.getName());
-			System.out.println("The agent has located "+friends.size() + " friends.");
-		
+
+		if (!repeated) {
+
+			friends.add(friend);
+			System.out.println("The list of friends has been updated with "
+					+ friend.getName());
+			System.out.println("The agent has located " + friends.size()
+					+ " friends.");
+
 		} else {
-			
-			System.out.println(friend.getName()+" is already known. Any new friend node will be added.");
+
+			System.out.println(friend.getName()
+					+ " is already known. Any new friend node will be added.");
 		}
-		
+
 		return friends.indexOf(friend);
 	}
 
