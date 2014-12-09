@@ -4,6 +4,7 @@
 package com.xmunch.facebook.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -12,19 +13,86 @@ import org.springframework.social.facebook.api.PagedList;
 import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.Reference;
 
+import com.xmunch.atomspace.aux.AtomParams;
+import com.xmunch.atomspace.aux.AtomSpaceParams;
+import com.xmunch.atomspace.aux.AtomType;
+import com.xmunch.atomspace.aux.Globals;
+import com.xmunch.atomspace.aux.VertexType;
+import com.xmunch.atomspace.model.AtomSpace;
+
 /**
  * @author xmunch
  * 
  */
 public class FacebookAgent {
 
+	final String HAS_POSTED = "has posted";
+	final String IS_FRIEND_OF = "friend of";
+	final String TIME = "at time";
+	final String ME = "Me";
+	final String ROOT = "0";
+	
 	private String lastPostId = "";
 	private List<FacebookFriend> friends = new ArrayList<FacebookFriend>();
 
 	public FacebookAgent(Facebook facebook) {
-		System.out.println("Facebook agent is running");
 		consumeInformation(facebook);
-		System.out.println("Done");
+		transformToAtomSpace();
+	}
+
+	private void transformToAtomSpace() {
+			
+			Integer friendNumber, postNumber, lastNodeNumber = 0;
+			Iterator<FacebookFriend> friendIterator = friends.iterator();
+			
+			// Params
+			HashMap<String, String> atomSpaceParams = new HashMap<String, String>();
+	    	HashMap<String, String> atomParams = new HashMap<String, String>();
+	    	atomSpaceParams.put(AtomSpaceParams.VISUALIZATION.get(),Globals.TRUE.get());
+	    	
+	    	//API call
+	    	AtomSpace atomSpace = AtomSpace.getInstance(atomSpaceParams);
+	    	
+	    	//Creation of the root node
+	    	atomParams.put(AtomParams.VERTEX_LABEL.get(), ME);
+			atomParams.put(AtomParams.VERTEX_TYPE.get(), VertexType.A.get());
+			atomSpace.createAtom(AtomType.VERTEX.get(), atomParams);
+	    	
+	    	while(friendIterator.hasNext()){
+	    		FacebookFriend friend = friendIterator.next();
+	    		List<FacebookPost> posts = friend.getPosts();
+	    		Iterator<FacebookPost> postIterator = posts.iterator();
+	    		lastNodeNumber++;
+	    		friendNumber = lastNodeNumber;
+	    		
+	    		//Create friend vertex
+	    		atomParams.put(AtomParams.VERTEX_LABEL.get(), friend.getName());
+				atomParams.put(AtomParams.VERTEX_TYPE.get(), VertexType.B.get());
+				atomSpace.createAtom(AtomType.VERTEX.get(), atomParams);
+				
+				//Create me->friend edge
+				atomParams.put(AtomParams.EDGE_LABEL.get(),IS_FRIEND_OF);
+				atomParams.put(AtomParams.FROM.get(),ROOT);
+				atomParams.put(AtomParams.TO.get(),String.valueOf(friendNumber));
+				atomSpace.createAtom(AtomType.EDGE.get(), atomParams);
+				
+				while(postIterator.hasNext()){
+					FacebookPost post = postIterator.next();
+					lastNodeNumber++;
+					postNumber = lastNodeNumber;
+					
+					//Create post vertex
+		    		atomParams.put(AtomParams.VERTEX_LABEL.get(), post.getType());
+					atomParams.put(AtomParams.VERTEX_TYPE.get(), VertexType.C.get());
+					atomSpace.createAtom(AtomType.VERTEX.get(), atomParams);
+					
+					//Create me->friend edge
+					atomParams.put(AtomParams.EDGE_LABEL.get(),HAS_POSTED);
+					atomParams.put(AtomParams.FROM.get(),String.valueOf(friendNumber));
+					atomParams.put(AtomParams.TO.get(),String.valueOf(postNumber));
+					atomSpace.createAtom(AtomType.EDGE.get(), atomParams);
+				}
+	    	} 	
 	}
 
 	public void consumeInformation(Facebook facebook) {
@@ -67,18 +135,8 @@ public class FacebookAgent {
 		}
 
 		if (!repeated) {
-
 			friends.add(friend);
-			System.out.println("The list of friends has been updated with "
-					+ friend.getName());
-			System.out.println("The agent has located " + friends.size()
-					+ " friends.");
-
-		} else {
-
-			System.out.println(friend.getName()
-					+ " is already known. Any new friend node will be added.");
-		}
+		} 
 
 		return friends.indexOf(friend);
 	}

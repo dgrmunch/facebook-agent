@@ -8,7 +8,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.gson.Gson;
 import com.xmunch.facebook.aux.GlobalValues;
 import com.xmunch.facebook.model.FacebookAgent;
 
@@ -16,9 +15,7 @@ import com.xmunch.facebook.model.FacebookAgent;
 @RequestMapping("/")
 public class FacebookController {
 
-	Gson gson = new Gson();
     private Facebook facebook;
-    private FacebookAgent fa;
     
     @Inject
     public FacebookController(Facebook facebook) {
@@ -30,8 +27,7 @@ public class FacebookController {
         if (!facebook.isAuthorized()) {
             return GlobalValues.FACEBOOK_REDIRECT.get();
         } else {
-        	 this.fa = new FacebookAgent(facebook);	
-        	 model.addAttribute(GlobalValues.JSON_ATTRIBUTE.get(),gson.toJson(fa.getFriends()));
+        	 FacebookAgent fa = new FacebookAgent(facebook);
              return GlobalValues.DONE_TEMPLATE.get();
         }
     }

@@ -45,12 +45,9 @@ public class FacebookFriend implements Serializable{
 				post.getDescription());
 		
 		if(!this.posts.contains(facebookPost)){
-			System.out.println("A post was published by "+this.name+" on "+post.getCreatedTime().toString());
 			posts.add(facebookPost);
-			System.out.println(this.name + " has published a total of "+posts.size()+" posts");
 			return true;
 		} else {
-			System.out.println("Repeated post");
 			return false;
 		}
 	}
