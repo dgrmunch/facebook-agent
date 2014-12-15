@@ -17,7 +17,6 @@ import com.xmunch.atomspace.aux.AtomParams;
 import com.xmunch.atomspace.aux.AtomSpaceParams;
 import com.xmunch.atomspace.aux.AtomType;
 import com.xmunch.atomspace.aux.Globals;
-import com.xmunch.atomspace.aux.VertexType;
 import com.xmunch.atomspace.model.AtomSpace;
 
 /**
@@ -26,11 +25,13 @@ import com.xmunch.atomspace.model.AtomSpace;
  */
 public class FacebookAgent {
 
-	final String HAS_POSTED = "has posted";
-	final String IS_FRIEND_OF = "friend of";
-	final String TIME = "at time";
-	final String ME = "Me";
-	final String ROOT = "0";
+	private static final String FACEBOOK_LOGGED_USER = "fb_logged_user";
+	private static final String FACEBOOK_FRIEND = "fb_friend";
+	private static final String FACEBOOK_PUBLICATION = "fb_publication";
+	final String HAS_POSTED = "has_posted";
+	final String IS_FRIEND_OF = "friend_of";
+	final String TIME = "at_time";
+	final String ME = "facebook_user";
 	
 	private String lastPostId = "";
 	private List<FacebookFriend> friends = new ArrayList<FacebookFriend>();
@@ -41,55 +42,50 @@ public class FacebookAgent {
 	}
 
 	private void transformToAtomSpace() {
-			
-			Integer friendNumber, postNumber, lastNodeNumber = 0;
 			Iterator<FacebookFriend> friendIterator = friends.iterator();
 			
 			// Params
 			HashMap<String, String> atomSpaceParams = new HashMap<String, String>();
 	    	HashMap<String, String> atomParams = new HashMap<String, String>();
 	    	atomSpaceParams.put(AtomSpaceParams.VISUALIZATION.get(),Globals.TRUE.get());
+	    	atomSpaceParams.put(AtomSpaceParams.SELF.get(),Globals.FALSE.get());
 	    	
 	    	//API call
 	    	AtomSpace atomSpace = AtomSpace.getInstance(atomSpaceParams);
 	    	
-	    	//Creation of the root node
+	    	//Creation of the "me" node
 	    	atomParams.put(AtomParams.VERTEX_LABEL.get(), ME);
-			atomParams.put(AtomParams.VERTEX_TYPE.get(), VertexType.A.get());
+			atomParams.put(AtomParams.VERTEX_TYPE.get(), FACEBOOK_LOGGED_USER);
 			atomSpace.createAtom(AtomType.VERTEX.get(), atomParams);
 	    	
 	    	while(friendIterator.hasNext()){
 	    		FacebookFriend friend = friendIterator.next();
 	    		List<FacebookPost> posts = friend.getPosts();
 	    		Iterator<FacebookPost> postIterator = posts.iterator();
-	    		lastNodeNumber++;
-	    		friendNumber = lastNodeNumber;
 	    		
 	    		//Create friend vertex
 	    		atomParams.put(AtomParams.VERTEX_LABEL.get(), friend.getName());
-				atomParams.put(AtomParams.VERTEX_TYPE.get(), VertexType.B.get());
+				atomParams.put(AtomParams.VERTEX_TYPE.get(), FACEBOOK_FRIEND);
 				atomSpace.createAtom(AtomType.VERTEX.get(), atomParams);
 				
 				//Create me->friend edge
 				atomParams.put(AtomParams.EDGE_LABEL.get(),IS_FRIEND_OF);
-				atomParams.put(AtomParams.FROM.get(),ROOT);
-				atomParams.put(AtomParams.TO.get(),String.valueOf(friendNumber));
+				atomParams.put(AtomParams.FROM.get(),ME);
+				atomParams.put(AtomParams.TO.get(),friend.getName());
 				atomSpace.createAtom(AtomType.EDGE.get(), atomParams);
 				
 				while(postIterator.hasNext()){
 					FacebookPost post = postIterator.next();
-					lastNodeNumber++;
-					postNumber = lastNodeNumber;
 					
 					//Create post vertex
-		    		atomParams.put(AtomParams.VERTEX_LABEL.get(), post.getType());
-					atomParams.put(AtomParams.VERTEX_TYPE.get(), VertexType.C.get());
+		    		atomParams.put(AtomParams.VERTEX_LABEL.get(), post.getId());
+					atomParams.put(AtomParams.VERTEX_TYPE.get(), FACEBOOK_PUBLICATION);
 					atomSpace.createAtom(AtomType.VERTEX.get(), atomParams);
 					
 					//Create me->friend edge
 					atomParams.put(AtomParams.EDGE_LABEL.get(),HAS_POSTED);
-					atomParams.put(AtomParams.FROM.get(),String.valueOf(friendNumber));
-					atomParams.put(AtomParams.TO.get(),String.valueOf(postNumber));
+					atomParams.put(AtomParams.FROM.get(),friend.getName());
+					atomParams.put(AtomParams.TO.get(),post.getId());
 					atomSpace.createAtom(AtomType.EDGE.get(), atomParams);
 				}
 	    	} 	
